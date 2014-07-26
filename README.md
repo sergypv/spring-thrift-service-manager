@@ -1,6 +1,6 @@
 # spring-thrift-service-manager
 
-Manage Thrift services through XML configuration
+Manage and setup Thrift services through configuration
 
 This little jar will allow you configure Thrift services using an xml or text driven configuration, there are two main advantages on this approach:
 
@@ -14,21 +14,21 @@ There are two pieces of configuration, services setup and server configuration. 
 ### Server configuration
 
 The server configuration provides both Server and Transport. thrift-service-manager requires of a factory for those in order to operate,
-this need to be provided a construction time. The jar givesa two different servers out of the box but you can create in 5 minutes all the others (see below Using Other Servers).
+this need to be provided a construction time. The jar gives two different servers out of the box but you can create in 5 minutes all the others (see below Using Other Servers).
 
-* __ServiceThreadPoolWrapper__. This implementation is based on a TThreadedSelectorServer server (http://people.apache.org/~thejas/thrift-0.9/javadoc/org/apache/thrift/server/TThreadedSelectorServer.html) over a TNonblockingServerSocket transport layer (people.apache.org/~thejas/thrift-0.9/javadoc/org/apache/thrift/transport/TNonblockingServerSocket.html)
+* __ServiceThreadPoolWrapper__. This implementation is based on a TThreadedSelectorServer server over a TNonblockingServerSocket transport layer
 * __SecuredThreadPoolWrapper__. This implementation uses a public/private key pair in order to secure the server/client communication. It is based on a TThreadPoolServer server over a TSSLTransport transport layer.
 
 #### Using Other Servers
 
 Using any other combination of Server/Transport it's very easy. Implement _AbstractRunnableServiceWrapper_, including the factory inner class, and you are good to go. 
-There is only one mandatory method: _getServer_, which should return the server you want to use. The Factory class should returns the a new instance of it each time _getServiceWrapper_ is invoked.
+There is only one mandatory method: _getServer_, which should return the server you want to use. The Factory class should returns a new instance of it each time _getServiceWrapper_ is invoked.
  
 Just copy _ServiceThreadPoolWrapper_ as an starting point and go from there. If you do so, please contribute by providing the code as a Pull Request.
 
 ### Service setup
 
-The are two ways to initialize services with thrift-service-manager, through XML configuration and csv lists.
+The are two ways to initialize services with thrift-service-manager: through XML configuration and csv lists.
 On both cases you need to provide the configuration at construction time.
 
 #### XML Configuration
@@ -71,8 +71,8 @@ Example:
 
 ```java
 String serviceNames = "MathService,MathService,ThreadService";
-String serviceInterfaces = SERVICE_PACKAGE + ".MathTestServiceAddition," + SERVICE_PACKAGE + ".MathTestServiceSubtraction," + SERVICE_PACKAGE + ".ThreadTestService";
-String serviceImplementations = SERVICE_PACKAGE + ".MathServiceAdditionImpl," + SERVICE_PACKAGE + ".MathServiceSubtractionImpl," + SERVICE_PACKAGE + ".ThreadServiceImpl";
+String serviceInterfaces = "org.sergilos.servicemanager.remote.test.MathTestServiceAddition,org.sergilos.servicemanager.remote.test.MathTestServiceSubtraction,org.sergilos.servicemanager.remote.test.ThreadTestService";
+String serviceImplementations = org.sergilos.servicemanager.remote.test.MathServiceAdditionImpl,org.sergilos.servicemanager.remote.test.MathServiceSubtractionImpl,org.sergilos.servicemanager.remote.test.ThreadServiceImpl";
 String servicePorts = "10902,10902,10903";
 
 serviceManager = new ServiceManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory(1, 1));
@@ -80,7 +80,7 @@ serviceManager = new ServiceManager(serviceNames, serviceInterfaces, serviceImpl
 
 ### Spring Autowiring
 
-If you are using Spring in your project you can take advantage of the dependency injection capabilities that come with it. Simply use the _@Autowired_ annotation in your services implementation and setup the _applicationContext_ in the _ServiceManager_.
+If you are using Spring in your project you can take advantage of the dependency injection capabilities that come with it. Simply use the _@Autowired_ annotation in your services implementation and setup the _ServiceManager_ in the application context.
 
 Example:
 
@@ -92,7 +92,7 @@ Example:
 
 ## Client side
 
-Example code to start using your services once it is up:
+Example code to start using your services once they are up:
 
 ```java
 TTransport transport = new TFramedTransport(new TSocket("localhost", 10904));
@@ -107,4 +107,4 @@ int result = mathAdditionClient.testingSum(100, 200);
 
 ## FAQ
 
-* __Can I use thrift-service-manager without Spring?__. In theory it would work without spring, however it does have some Spring dependencies so you will get ClassNotFoundException all over the place. Remove those dependencies is very straight forward, making it optional is not and that is why I have not done it
+* __Can I use thrift-service-manager without Spring?__ In theory it would work without Spring, however it does have some Spring dependencies so you will get ClassNotFoundException all over the place. Remove those dependencies is very straight forward (be my guest), making them optional is not that easy and that is why I have not done it yet.
