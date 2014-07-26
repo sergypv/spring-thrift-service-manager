@@ -104,3 +104,7 @@ MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.
 
 int result = mathAdditionClient.testingSum(100, 200);
 ```
+
+## FAQ
+
+* __Can I use thrift-service-manager without Spring?__. In theory it would work without spring, however it does have some Spring dependencies so you will get ClassNotFoundException all over the place. Remove those dependencies is very straight forward, making it optional is not and that is why I have not done it
