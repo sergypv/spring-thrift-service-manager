@@ -52,8 +52,10 @@ public abstract class AbstractRunnableServiceWrapper implements Runnable {
 
 	private <T> T getHandlerInstance(Class<T> handler) throws InstantiationException, IllegalAccessException {
 		T handlerInstance = handler.newInstance();
-		this.applicationContext.getAutowireCapableBeanFactory().autowireBean(handlerInstance);
-
+		if(this.applicationContext != null) {
+            LOGGER.debug("Autowiring {}", handlerInstance.getClass().getSimpleName());
+            this.applicationContext.getAutowireCapableBeanFactory().autowireBean(handlerInstance);
+        }
 		return handlerInstance;
 	}
 
