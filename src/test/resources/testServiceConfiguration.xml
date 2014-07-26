@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"  ?>
+
+<thirftServiceConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="thriftServiceDefinition.xsd">
+	<service name="MathService" port="10904">
+		<serviceDefinition interface="org.sergilos.servicemanager.remote.test.MathTestServiceAddition" implementation="org.sergilos.servicemanager.remote.test.MathServiceAdditionImpl" />
+		<serviceDefinition interface="org.sergilos.servicemanager.remote.test.MathTestServiceSubtraction" implementation="org.sergilos.servicemanager.remote.test.MathServiceSubtractionImpl" />
+	</service>
+	<service name="ThreadService" port="10905">
+		<serviceDefinition interface="org.sergilos.servicemanager.remote.test.ThreadTestService" implementation="org.sergilos.servicemanager.remote.test.ThreadServiceImpl" />
+	</service>
+</thirftServiceConfiguration>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"  ?>
+
+<thirftServiceConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:noNamespaceSchemaLocation="thriftServiceDefinition.xsd">
+    <!-- Example configuration -->
+    <service name="sergilosEventRegistry" port="16500">
+        <serviceDefinition interface="org.sergilos.remote.service.SergilosService"
+                           implementation="org.sergilos.remote.service.SergilosServiceHandler"/>
+    </service>
+</thirftServiceConfiguration>

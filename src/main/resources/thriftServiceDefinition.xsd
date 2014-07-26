@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="thirftServiceConfiguration">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="service" minOccurs="1" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Service definition</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="serviceDefinition" minOccurs="1" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="interface" use="required" type="nonEmptyString">
+										<xs:annotation>
+											<xs:documentation>Reference to the Thrift Service Interface</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="implementation" use="required" type="nonEmptyString">
+										<xs:annotation>
+											<xs:documentation>Reference to the Thrift Service Implementation</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="name" use="required" type="nonEmptyString">
+							<xs:annotation>
+								<xs:documentation>Service name (for reference and logging purposes)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute name="port" use="required" type="xs:int">
+							<xs:annotation>
+								<xs:documentation>Port number where the service will run</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name="nonEmptyString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
