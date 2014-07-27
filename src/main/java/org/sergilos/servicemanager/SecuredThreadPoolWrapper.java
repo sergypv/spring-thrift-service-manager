@@ -21,28 +21,28 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuredThreadPoolWrapper.class);
 
     private int remotePort;
-    private String trueStoreFile;
-    private String trueStorePass;
+    private String keystoreFile;
+    private String keystorePass;
 
     public SecuredThreadPoolWrapper(ApplicationContext applicationContext, String serviceName, int remotePort,
-                                    String trueStoreFile, String trueStorePass) {
+                                    String keystoreFile, String keystorePass) {
         super(applicationContext, serviceName);
         LOGGER.debug("Service setup: {}", serviceName);
         this.remotePort = remotePort;
-        this.trueStoreFile = trueStoreFile;
-        this.trueStorePass = trueStorePass;
+        this.keystoreFile = keystoreFile;
+        this.keystorePass = keystorePass;
     }
 
     @Override
     protected TServer getServer(TProcessor processor) throws TTransportException {
-        LOGGER.debug("Setting Secured Server on port {} and keystore", remotePort, trueStoreFile);
-        TServerSocket serverTransport;
-        TSSLTransportFactory.TSSLTransportParameters params = new TSSLTransportFactory.TSSLTransportParameters();
-        params.setTrustStore(trueStoreFile, trueStorePass);
+        LOGGER.debug("Setting Secured Server on port {} and keystore", remotePort, keystoreFile);
 
+        TSSLTransportFactory.TSSLTransportParameters params = new TSSLTransportFactory.TSSLTransportParameters();
+        params.setKeyStore(keystoreFile, keystorePass);
+
+        TServerSocket serverTransport = null;
         try {
-            serverTransport = TSSLTransportFactory.getServerSocket(
-                    remotePort, 10000, InetAddress.getByName("localhost"), params);
+            serverTransport = TSSLTransportFactory.getServerSocket(remotePort, 1000, InetAddress.getByName("localhost"), params);
         } catch (UnknownHostException e) {
             throw new TTransportException(e);
         }
@@ -51,19 +51,19 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
     }
 
     public static class SecuredThreadPoolWrapperFactory extends ServiceWrapperFactory {
-        private String trueStoreFile;
-        private String trueStorePass;
+        private String keystoreFile;
+        private String keystorePass;
 
-        public SecuredThreadPoolWrapperFactory(String trueStoreFile, String trueStorePass) {
+        public SecuredThreadPoolWrapperFactory(String keystoreFile, String keystorePass) {
             super();
-            this.trueStoreFile = trueStoreFile;
-            this.trueStorePass = trueStorePass;
+            this.keystoreFile = keystoreFile;
+            this.keystorePass = keystorePass;
         }
 
         @Override
         public AbstractRunnableServiceWrapper getServiceWrapper(ApplicationContext applicationContext,
                                                                 String serviceName, Integer port) {
-            return new SecuredThreadPoolWrapper(applicationContext, serviceName, port, trueStoreFile, trueStorePass);
+            return new SecuredThreadPoolWrapper(applicationContext, serviceName, port, keystoreFile, keystorePass);
         }
    }
 }
