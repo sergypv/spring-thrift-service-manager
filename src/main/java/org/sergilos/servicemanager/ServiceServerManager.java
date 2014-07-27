@@ -26,8 +26,8 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class ServiceManager implements ApplicationContextAware {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
+public class ServiceServerManager implements ApplicationContextAware {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceServerManager.class);
 
 	public final static String CONFIG_SEPARATOR = ",";
 
@@ -42,7 +42,7 @@ public class ServiceManager implements ApplicationContextAware {
 	private List<String> servicePortsList;
 	private boolean startServices = true;
 
-	public ServiceManager(String xmlConfigurationLocation, AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
+	public ServiceServerManager(String xmlConfigurationLocation, AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
 		this.serviceNamesList = new ArrayList<>();
 		this.serviceInterfacesList = new ArrayList<>();
 		this.serviceImplementationsList = new ArrayList<>();
@@ -91,8 +91,8 @@ public class ServiceManager implements ApplicationContextAware {
 		}
 	}
 
-	public ServiceManager(String serviceNamesString, String serviceInterfacesString, String serviceImplementationsString, String servicePortsString,
-                          AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
+	public ServiceServerManager(String serviceNamesString, String serviceInterfacesString, String serviceImplementationsString, String servicePortsString,
+                                AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
 		if (serviceNamesString == null || serviceInterfacesString == null || serviceImplementationsString == null || servicePortsString == null) {
 			throw new IllegalArgumentException("One or more parameters are null, but all the ServiceManager parameters are mandatory");
 		}
@@ -109,15 +109,15 @@ public class ServiceManager implements ApplicationContextAware {
         this.serviceWrapperFactory = serviceWrapperFactory;
     }
 
-	public ServiceManager(String serviceNamesString, String serviceInterfacesString, String serviceImplementationsString, String servicePortsString,
-                          boolean startServices, AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
+	public ServiceServerManager(String serviceNamesString, String serviceInterfacesString, String serviceImplementationsString, String servicePortsString,
+                                boolean startServices, AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
 		this(serviceNamesString, serviceInterfacesString, serviceImplementationsString, servicePortsString, serviceWrapperFactory);
 		this.startServices = startServices;
         this.serviceWrapperFactory = serviceWrapperFactory;
 	}
 
-	public ServiceManager(List<String> serviceNamesList, List<String> serviceInterfacesList, List<String> serviceImplementationsList,
-                          List<String> servicePortsList, AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
+	public ServiceServerManager(List<String> serviceNamesList, List<String> serviceInterfacesList, List<String> serviceImplementationsList,
+                                List<String> servicePortsList, AbstractRunnableServiceWrapper.ServiceWrapperFactory serviceWrapperFactory) {
 		if (serviceNamesList == null || serviceImplementationsList == null || serviceImplementationsList == null || servicePortsList == null) {
 			throw new IllegalArgumentException("One or more parameters are null, but all the ServiceManager parameters are mandatory");
 		}

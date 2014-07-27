@@ -27,7 +27,7 @@ import java.util.Collection;
  */
 public abstract class AbstractServiceManagerTest {
     protected static final String SERVICE_PACKAGE = "org.sergilos.servicemanager.remote.test";
-    protected ServiceManager serviceManager;
+    protected ServiceServerManager serviceServerManager;
 
     @Before
     public void setup() throws TTransportException {
@@ -36,33 +36,33 @@ public abstract class AbstractServiceManagerTest {
         String serviceImplementations = SERVICE_PACKAGE + ".MathServiceAdditionImpl," + SERVICE_PACKAGE + ".MathServiceSubtractionImpl," + SERVICE_PACKAGE + ".ThreadServiceImpl";
         String servicePorts = "10900,10900,10901";
 
-        serviceManager = new ServiceManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, false, getWrapperFactory());
-        serviceManager.setApplicationContext(new GenericApplicationContext());
-        serviceManager.startupServer();
+        serviceServerManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, false, getWrapperFactory());
+        serviceServerManager.setApplicationContext(new GenericApplicationContext());
+        serviceServerManager.startupServer();
     }
 
     @After
     public void tearDown() {
-        serviceManager.stopServices();
+        serviceServerManager.stopServices();
     }
 
     private void setupLiveServiceByXml() throws TTransportException, FileNotFoundException, XPathExpressionException, ParserConfigurationException,
             SAXException, IOException {
-        serviceManager = new ServiceManager(getClass().getResource("/testServiceConfiguration.xml").getPath(), getWrapperFactory());
+        serviceServerManager = new ServiceServerManager(getClass().getResource("/testServiceConfiguration.xml").getPath(), getWrapperFactory());
         setupLiveServer();
     }
 
     @Test
     public void getServicesList() {
-        Collection<AbstractRunnableServiceWrapper> serverList = serviceManager.getSerivesList();
+        Collection<AbstractRunnableServiceWrapper> serverList = serviceServerManager.getSerivesList();
         Assert.assertEquals(2, serverList.size());
     }
 
     @Test
     public void getService() {
-        Assert.assertNotNull(serviceManager.getService("MathService"));
-        Assert.assertNull(serviceManager.getService("AnotherService"));
-        Assert.assertNull(serviceManager.getService(null));
+        Assert.assertNotNull(serviceServerManager.getService("MathService"));
+        Assert.assertNull(serviceServerManager.getService("AnotherService"));
+        Assert.assertNull(serviceServerManager.getService(null));
     }
 
     @Test
@@ -84,7 +84,7 @@ public abstract class AbstractServiceManagerTest {
         String serviceImplementations = SERVICE_PACKAGE + ".MathServiceAdditionImpl," + SERVICE_PACKAGE + ".MathServiceSubtractionImpl," + SERVICE_PACKAGE + ".ThreadServiceImpl";
         String servicePorts = "10902,10902,10903";
 
-        serviceManager = new ServiceManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, getWrapperFactory());
+        serviceServerManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, getWrapperFactory());
         setupLiveServer();
     }
 
@@ -104,8 +104,8 @@ public abstract class AbstractServiceManagerTest {
     }
 
     protected void setupLiveServer() throws TTransportException {
-        serviceManager.setApplicationContext(new GenericApplicationContext());
-        serviceManager.startupServer();
+        serviceServerManager.setApplicationContext(new GenericApplicationContext());
+        serviceServerManager.startupServer();
         synchronized (this) {
             try {
                 // Wait for servers to come-up
