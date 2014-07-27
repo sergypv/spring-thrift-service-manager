@@ -83,7 +83,7 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
         }
 
         @Override
-        public TProtocol getClientProtocol(String serviceName, String host, Integer port) throws TTransportException {
+        public TProtocol getClientProtocol(String serviceInterfaceClassName, String host, Integer port) throws TTransportException {
             if(truststoreFile == null || truststorePass == null){
                 throw new IllegalStateException("truststore not defined. Initialize the Factory properly");
             }
@@ -93,7 +93,7 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
             TTransport transport = TSSLTransportFactory.getClientSocket(host, port, 1000, paramsClient);
             TProtocol protocol = new TBinaryProtocol(transport);
 
-            return new TMultiplexedProtocol(protocol, serviceName);
+            return new TMultiplexedProtocol(protocol, serviceInterfaceClassName);
         }
     }
 }

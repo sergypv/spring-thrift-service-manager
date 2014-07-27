@@ -82,12 +82,35 @@ ServiceServerManager serviceManager = new ServiceServerManager(serviceNames, ser
 
 If you are using Spring in your project you can take advantage of the dependency injection capabilities that come with it. Simply use the _@Autowired_ annotation in your services implementation and setup the _ServiceServerManager_ in the application context.
 
-Example:
+Spring _applicationContext.xml_ example:
 
 ```XML
-<bean id="ServiceManager" class="org.sergilos.servicemanager.ServiceServerManager" destroy-method="stopServices" init-method="startupServer">
-    <constructor-arg name="xmlConfigurationLocation" value="/path/to/xml/config"/>
-</bean>
+<beans .... >
+    <!-- [...] -->
+    
+    <!-- Examples of the two available Wrapper factories. Use any of them or create your own -->
+    <bean id="securedServiceWrapperFactory"
+          class="org.sergilos.servicemanager.wrappers.SecuredThreadPoolWrapper$SecuredThreadPoolWrapperFactory"
+          factory-method="getServerInstance">
+        <constructor-arg name="keystoreFile" value="/path/to/keystore.jks"/>
+        <constructor-arg name="keystorePass" value="yourKeystorePassword"/>
+    </bean>
+    
+    <bean id="serviceThreadPoolWrapperFactory"
+          class="org.sergilos.servicemanager.wrappers.ServiceThreadPoolWrapper$ServiceThreadPoolWrapperFactory">
+        <constructor-arg name="numSelectorThreads" value="5"/>
+        <constructor-arg name="numWorkerThreads" value="2"/>
+    </bean>
+    
+    <!-- ServiceServerManager requires the path to your config file and the WrapperFactory -->
+    <bean id="serviceManager" class="org.sergilos.servicemanager.ServiceServerManager" destroy-method="stopServices"
+          init-method="startupServer">
+        <constructor-arg name="xmlConfigurationLocation" value="/path/to/xml/config"/>
+        <constructor-arg name="serviceWrapperFactory" ref="serviceThreadPoolWrapperFactory"/>
+    </bean>
+    
+    <!-- [...] -->
+</beans>
 ```
 
 ## Client side
@@ -97,10 +120,12 @@ Example code to start using your services once they are up:
 ```java
 ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory serviceWrapper = new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory();
 
-// ServiceName must be the same that the one you defined in the server side. Host and port is the location of your host 
-TProtocol serviceProtocol = serviceWrapper.getClientProtocol("aServiceName", "localhost", 10500);
-MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.Client(serviceProtocol);
+// Host and port is the location of your host 
+TProtocol serviceProtocol = serviceWrapper.getClientProtocol(MathTestServiceAddition.class.getName(), "localhost", 10500);
+MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.Client(serviceProtocol); // This is your client ready to use
 ```
+
+Notice that _serviceInterfaceClassName_ refers to the __full class path__ of the interface you are trying to get. For example, on the example above (see _XML Configuration_) it would be _org.sergilos.servicemanager.remote.test.MathTestServiceAddition_
 
 ## FAQ
 

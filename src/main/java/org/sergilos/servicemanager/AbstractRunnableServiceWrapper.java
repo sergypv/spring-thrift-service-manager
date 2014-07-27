@@ -102,6 +102,6 @@ public abstract class AbstractRunnableServiceWrapper implements Runnable {
 
     public static abstract class ServiceWrapperFactory {
         public abstract AbstractRunnableServiceWrapper getServiceServerWrapper(ApplicationContext applicationContext, String serviceName, Integer port);
-        public abstract TProtocol getClientProtocol(String serviceName, String host, Integer port) throws TTransportException;
+        public abstract TProtocol getClientProtocol(String serviceInterfaceClassName, String host, Integer port) throws TTransportException;
     }
 }

@@ -62,12 +62,12 @@ public class ServiceThreadPoolWrapper extends AbstractRunnableServiceWrapper {
             return new ServiceThreadPoolWrapper(applicationContext, serviceName, port, numSelectorThreads, numWorkerThreads);
         }
 
-        public TProtocol getClientProtocol(String serviceName, String host, Integer port) throws TTransportException {
+        public TProtocol getClientProtocol(String serviceInterfaceClassName, String host, Integer port) throws TTransportException {
             TSocket localhostSocket = new TSocket(host, port);
             localhostSocket.open();
             TProtocol protocol = new TBinaryProtocol(new TFramedTransport(localhostSocket));
 
-            return new TMultiplexedProtocol(protocol, serviceName);
+            return new TMultiplexedProtocol(protocol, serviceInterfaceClassName);
         }
     }
 }
