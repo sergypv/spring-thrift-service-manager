@@ -2,6 +2,7 @@ package org.sergilos.servicemanager;
 
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
@@ -100,7 +101,7 @@ public abstract class AbstractRunnableServiceWrapper implements Runnable {
     protected abstract TServer getServer(TProcessor processor) throws TTransportException;
 
     public static abstract class ServiceWrapperFactory {
-        public abstract AbstractRunnableServiceWrapper getServiceWrapper(ApplicationContext applicationContext,
-                                                                         String serviceName, Integer port);
+        public abstract AbstractRunnableServiceWrapper getServiceServerWrapper(ApplicationContext applicationContext, String serviceName, Integer port);
+        public abstract TProtocol getClientProtocol(String serviceName, String host, Integer port) throws TTransportException;
     }
 }

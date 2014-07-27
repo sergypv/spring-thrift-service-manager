@@ -1,10 +1,14 @@
 package org.sergilos.servicemanager;
 
 import org.apache.thrift.TProcessor;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TMultiplexedProtocol;
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +44,7 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
         TSSLTransportFactory.TSSLTransportParameters params = new TSSLTransportFactory.TSSLTransportParameters();
         params.setKeyStore(keystoreFile, keystorePass);
 
-        TServerSocket serverTransport = null;
+        TServerSocket serverTransport;
         try {
             serverTransport = TSSLTransportFactory.getServerSocket(remotePort, 1000, InetAddress.getByName("localhost"), params);
         } catch (UnknownHostException e) {
@@ -53,17 +57,42 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
     public static class SecuredThreadPoolWrapperFactory extends ServiceWrapperFactory {
         private String keystoreFile;
         private String keystorePass;
+        private String truststoreFile;
+        private String truststorePass;
 
-        public SecuredThreadPoolWrapperFactory(String keystoreFile, String keystorePass) {
-            super();
+        public SecuredThreadPoolWrapperFactory(String keystoreFile, String keystorePass, String truststoreFile, String truststorePass) {
             this.keystoreFile = keystoreFile;
             this.keystorePass = keystorePass;
+            this.truststoreFile = truststoreFile;
+            this.truststorePass = truststorePass;
+        }
+
+        public static SecuredThreadPoolWrapperFactory getServerInstance(String keystoreFile, String keystorePass) {
+            return new SecuredThreadPoolWrapperFactory(keystoreFile, keystorePass, null, null);
+        }
+
+        public static SecuredThreadPoolWrapperFactory getClientInstance(String truststoreFile, String truststorePass) {
+            return new SecuredThreadPoolWrapperFactory(null, null, truststoreFile, truststorePass);
         }
 
         @Override
-        public AbstractRunnableServiceWrapper getServiceWrapper(ApplicationContext applicationContext,
-                                                                String serviceName, Integer port) {
+        public AbstractRunnableServiceWrapper getServiceServerWrapper(ApplicationContext applicationContext,
+                                                                      String serviceName, Integer port) {
             return new SecuredThreadPoolWrapper(applicationContext, serviceName, port, keystoreFile, keystorePass);
         }
-   }
+
+        @Override
+        public TProtocol getClientProtocol(String serviceName, String host, Integer port) throws TTransportException {
+            if(truststoreFile == null || truststorePass == null){
+                throw new IllegalStateException("truststore not defined. Initialize the Factory properly");
+            }
+
+            TSSLTransportFactory.TSSLTransportParameters paramsClient = new TSSLTransportFactory.TSSLTransportParameters();
+            paramsClient.setTrustStore(truststoreFile, truststorePass);
+            TTransport transport = TSSLTransportFactory.getClientSocket(host, port, 1000, paramsClient);
+            TProtocol protocol = new TBinaryProtocol(transport);
+
+            return new TMultiplexedProtocol(protocol, serviceName);
+        }
+    }
 }

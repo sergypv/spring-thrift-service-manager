@@ -54,7 +54,7 @@ The above configuration defines three services, two of them (Addition and Subtra
 To start the service just specify the configuration file at construction time:
 
 ```java
-ServiceManager serviceManager = new ServiceManager("/whatever/your/path/is/testServiceConfiguration.xml", new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory(1, 1));
+ServiceServerManager serviceManager = new ServiceServerManager("/whatever/your/path/is/testServiceConfiguration.xml", new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory());
 serviceManager.startupServer();
 ```
 
@@ -72,20 +72,20 @@ Example:
 ```java
 String serviceNames = "MathService,MathService,ThreadService";
 String serviceInterfaces = "org.sergilos.servicemanager.remote.test.MathTestServiceAddition,org.sergilos.servicemanager.remote.test.MathTestServiceSubtraction,org.sergilos.servicemanager.remote.test.ThreadTestService";
-String serviceImplementations = org.sergilos.servicemanager.remote.test.MathServiceAdditionImpl,org.sergilos.servicemanager.remote.test.MathServiceSubtractionImpl,org.sergilos.servicemanager.remote.test.ThreadServiceImpl";
+String serviceImplementations = "org.sergilos.servicemanager.remote.test.MathServiceAdditionImpl,org.sergilos.servicemanager.remote.test.MathServiceSubtractionImpl,org.sergilos.servicemanager.remote.test.ThreadServiceImpl";
 String servicePorts = "10902,10902,10903";
 
-serviceManager = new ServiceManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory(1, 1));
+ServiceServerManager serviceManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory());
 ```
 
 ### Spring Autowiring
 
-If you are using Spring in your project you can take advantage of the dependency injection capabilities that come with it. Simply use the _@Autowired_ annotation in your services implementation and setup the _ServiceManager_ in the application context.
+If you are using Spring in your project you can take advantage of the dependency injection capabilities that come with it. Simply use the _@Autowired_ annotation in your services implementation and setup the _ServiceServerManager_ in the application context.
 
 Example:
 
 ```XML
-<bean id="ServiceManager" class="org.sergilos.servicemanager.ServiceManager" destroy-method="stopServices" init-method="startupServer">
+<bean id="ServiceManager" class="org.sergilos.servicemanager.ServiceServerManager" destroy-method="stopServices" init-method="startupServer">
     <constructor-arg name="xmlConfigurationLocation" value="/path/to/xml/config"/>
 </bean>
 ```
@@ -95,14 +95,11 @@ Example:
 Example code to start using your services once they are up:
 
 ```java
-TTransport transport = new TFramedTransport(new TSocket("localhost", 10904));
-transport.open();
+ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory serviceWrapper = new ServiceThreadPoolWrapper.ServiceThreadPoolWrapperFactory();
 
-TProtocol protocol = new TBinaryProtocol(transport);
-TMultiplexedProtocol multiplexProtocolAddition = new TMultiplexedProtocol(protocol, "org.sergilos.servicemanager.remote.test.MathTestServiceAddition");
-MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.Client(multiplexProtocolAddition);
-
-int result = mathAdditionClient.testingSum(100, 200);
+// ServiceName must be the same that the one you defined in the server side. Host and port is the location of your host 
+TProtocol serviceProtocol = serviceWrapper.getClientProtocol("aServiceName", "localhost", 10500);
+MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.Client(serviceProtocol);
 ```
 
 ## FAQ

@@ -175,7 +175,7 @@ public class ServiceServerManager implements ApplicationContextAware {
 			String serviceName = serviceNamesList.get(i).trim();
 			AbstractRunnableServiceWrapper serviceWrapper = serviceMap.get(serviceName);
 			if (serviceWrapper == null) {
-				serviceWrapper = serviceWrapperFactory.getServiceWrapper(applicationContext, serviceName, new Integer(servicePortsList.get(i).trim()));
+				serviceWrapper = serviceWrapperFactory.getServiceServerWrapper(applicationContext, serviceName, new Integer(servicePortsList.get(i).trim()));
 				serviceMap.put(serviceName, serviceWrapper);
 				LOGGER.debug("Initializing service: " + serviceName);
 			}

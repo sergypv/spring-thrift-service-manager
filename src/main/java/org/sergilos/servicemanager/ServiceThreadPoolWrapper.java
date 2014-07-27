@@ -2,11 +2,11 @@ package org.sergilos.servicemanager;
 
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TMultiplexedProtocol;
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadedSelectorServer;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TNonblockingServerSocket;
-import org.apache.thrift.transport.TTransportException;
+import org.apache.thrift.transport.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -45,17 +45,28 @@ public class ServiceThreadPoolWrapper extends AbstractRunnableServiceWrapper {
     }
 
     public static class ServiceThreadPoolWrapperFactory extends ServiceWrapperFactory {
-        private int numSelectorThreads;
-        private int numWorkerThreads;
+        private int numSelectorThreads = 2;
+        private int numWorkerThreads = 5;
 
         public ServiceThreadPoolWrapperFactory(int numSelectorThreads, int numWorkerThreads) {
             this.numSelectorThreads = numSelectorThreads;
             this.numWorkerThreads = numWorkerThreads;
         }
 
+        public ServiceThreadPoolWrapperFactory() {
+        }
+
         @Override
-        public AbstractRunnableServiceWrapper getServiceWrapper(ApplicationContext applicationContext, String serviceName, Integer port) {
+        public AbstractRunnableServiceWrapper getServiceServerWrapper(ApplicationContext applicationContext, String serviceName, Integer port) {
             return new ServiceThreadPoolWrapper(applicationContext, serviceName, port, numSelectorThreads, numWorkerThreads);
+        }
+
+        public TProtocol getClientProtocol(String serviceName, String host, Integer port) throws TTransportException {
+            TSocket localhostSocket = new TSocket(host, port);
+            localhostSocket.open();
+            TProtocol protocol = new TBinaryProtocol(new TFramedTransport(localhostSocket));
+
+            return new TMultiplexedProtocol(protocol, serviceName);
         }
     }
 }

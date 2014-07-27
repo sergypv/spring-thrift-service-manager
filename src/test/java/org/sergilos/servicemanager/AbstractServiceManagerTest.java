@@ -1,10 +1,7 @@
 package org.sergilos.servicemanager;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TMultiplexedProtocol;
 import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,7 +33,7 @@ public abstract class AbstractServiceManagerTest {
         String serviceImplementations = SERVICE_PACKAGE + ".MathServiceAdditionImpl," + SERVICE_PACKAGE + ".MathServiceSubtractionImpl," + SERVICE_PACKAGE + ".ThreadServiceImpl";
         String servicePorts = "10900,10900,10901";
 
-        serviceServerManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, false, getWrapperFactory());
+        serviceServerManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, false, getServerWrapperFactory());
         serviceServerManager.setApplicationContext(new GenericApplicationContext());
         serviceServerManager.startupServer();
     }
@@ -48,7 +45,7 @@ public abstract class AbstractServiceManagerTest {
 
     private void setupLiveServiceByXml() throws TTransportException, FileNotFoundException, XPathExpressionException, ParserConfigurationException,
             SAXException, IOException {
-        serviceServerManager = new ServiceServerManager(getClass().getResource("/testServiceConfiguration.xml").getPath(), getWrapperFactory());
+        serviceServerManager = new ServiceServerManager(getClass().getResource("/testServiceConfiguration.xml").getPath(), getServerWrapperFactory());
         setupLiveServer();
     }
 
@@ -84,23 +81,23 @@ public abstract class AbstractServiceManagerTest {
         String serviceImplementations = SERVICE_PACKAGE + ".MathServiceAdditionImpl," + SERVICE_PACKAGE + ".MathServiceSubtractionImpl," + SERVICE_PACKAGE + ".ThreadServiceImpl";
         String servicePorts = "10902,10902,10903";
 
-        serviceServerManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, getWrapperFactory());
+        serviceServerManager = new ServiceServerManager(serviceNames, serviceInterfaces, serviceImplementations, servicePorts, true, getServerWrapperFactory());
         setupLiveServer();
     }
 
     protected void testServices(int port) throws TException {
-        TTransport transport = getTransport(port);
-        TProtocol protocol = new TBinaryProtocol(transport);
+        AbstractRunnableServiceWrapper.ServiceWrapperFactory clientWrapperFactory = getClientWrapperFactory();
+        TProtocol additionProtocol = clientWrapperFactory.getClientProtocol(SERVICE_PACKAGE + ".MathTestServiceAddition", "localhost", port);
+        TProtocol subtractionProtocol = clientWrapperFactory.getClientProtocol(SERVICE_PACKAGE + ".MathTestServiceSubtraction", "localhost", port);
 
-        TMultiplexedProtocol multiplexProtocolAddition = new TMultiplexedProtocol(protocol, SERVICE_PACKAGE + ".MathTestServiceAddition");
-        MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.Client(multiplexProtocolAddition);
-        TMultiplexedProtocol multiplexProtocolSubtraction = new TMultiplexedProtocol(protocol, SERVICE_PACKAGE + ".MathTestServiceSubtraction");
-        MathTestServiceSubtraction.Client mathSubtractionClient = new MathTestServiceSubtraction.Client(multiplexProtocolSubtraction);
+        MathTestServiceAddition.Client mathAdditionClient = new MathTestServiceAddition.Client(additionProtocol);
+        MathTestServiceSubtraction.Client mathSubtractionClient = new MathTestServiceSubtraction.Client(subtractionProtocol);
 
         Assert.assertEquals(300, mathAdditionClient.testingSum(100, 200));
         Assert.assertEquals(-100, mathSubtractionClient.testingSubtract(100, 200));
 
-        transport.close();
+        additionProtocol.getTransport().close();
+        subtractionProtocol.getTransport().close();
     }
 
     protected void setupLiveServer() throws TTransportException {
@@ -117,7 +114,7 @@ public abstract class AbstractServiceManagerTest {
         }
     }
 
-    protected abstract TTransport getTransport(int port) throws TTransportException;
+    protected abstract AbstractRunnableServiceWrapper.ServiceWrapperFactory getServerWrapperFactory();
 
-    protected abstract AbstractRunnableServiceWrapper.ServiceWrapperFactory getWrapperFactory();
+    protected abstract AbstractRunnableServiceWrapper.ServiceWrapperFactory getClientWrapperFactory();
 }
