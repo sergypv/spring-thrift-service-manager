@@ -1,4 +1,4 @@
-package org.sergilos.servicemanager;
+package org.sergilos.servicemanager.wrappers;
 
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -7,6 +7,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadedSelectorServer;
 import org.apache.thrift.transport.*;
+import org.sergilos.servicemanager.AbstractRunnableServiceWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;

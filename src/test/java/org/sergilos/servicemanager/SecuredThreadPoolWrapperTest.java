@@ -1,5 +1,7 @@
 package org.sergilos.servicemanager;
 
+import org.sergilos.servicemanager.wrappers.SecuredThreadPoolWrapper;
+
 /**
  * @author Sergio Pereira
  * @since Jul 2014
