@@ -18,7 +18,7 @@ public class ServiceThreadPoolWrapper extends AbstractRunnableServiceWrapper {
     private int numSelectorThreads;
     private int numWorkerThreads;
 
-    public ServiceThreadPoolWrapper(ApplicationContext applicationContext, String serviceName, int remotePort,
+    private ServiceThreadPoolWrapper(ApplicationContext applicationContext, String serviceName, int remotePort,
                                     int numSelectorThreads, int numWorkerThreads) {
         super(applicationContext, serviceName);
         LOGGER.debug("Service setup: {}", serviceName);

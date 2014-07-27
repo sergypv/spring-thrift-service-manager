@@ -24,7 +24,7 @@ public class SecuredThreadPoolWrapper extends AbstractRunnableServiceWrapper {
     private String keystoreFile;
     private String keystorePass;
 
-    public SecuredThreadPoolWrapper(ApplicationContext applicationContext, String serviceName, int remotePort,
+    private SecuredThreadPoolWrapper(ApplicationContext applicationContext, String serviceName, int remotePort,
                                     String keystoreFile, String keystorePass) {
         super(applicationContext, serviceName);
         LOGGER.debug("Service setup: {}", serviceName);
